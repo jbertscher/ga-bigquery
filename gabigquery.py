@@ -10,16 +10,16 @@ class GaBigQuery(object):
         self.project_id = project_id
 
 
-    def load_device_type(self, query, views, start_date, end_date, view_diff, dialect = 'legacy'):
+    def read_views(self, query, views, start_date, end_date, view_diff, dialect = 'legacy'):
         """
-        Creates DataFrame with specified SQL query to BigQuery and Google Analytics views
+        Loads data from one or more Google Analytics views in Google Big Query
 
-        :param string query: Query to pass to BigQuery
-        :param list of tuples views: Views to be queried, in the format `(<view reference>, <view id>)`
+        :param string query: SQL-Like Query to return data values
+        :param list(tuple(<view reference>, <view id>)) views: Views to be queried, in the format
+        `(<view reference>, <view id>)`
         :param date start_date: Start date of query
         :param date end_date: End date of query
-        :param string view_diff: What differentiates each view. This will be set as the header for the column
-        that contains <view reference> (see explanation of `views`)
+        :param string view_diff: Header for the column that will contain `<view reference>` passed as part of `view`
         :param string dialect: Dialect of SQL query ('standard' / 'legacy')
         :return: DataFrame
         """
@@ -37,20 +37,19 @@ class GaBigQuery(object):
         return data
 
 
-    def load_all_views(self, start_date, end_date, dialect = 'legacy', col_order = None,
+    def read_app_and_web_views(self, start_date, end_date, dialect = 'legacy', col_order = None,
                    app_views = None, app_query = None, web_views = None, web_query = None):
         """
-        Creates DataFrame with specified SQL query to BigQuery and Google Analytics views that differ by device type
-        (Android vs iOS) and/or region
+        Like `read_views` but allows querying app and web views separately and combines results
 
         :param date start_date: Start date of query
         :param date end_date: End date of query
         :param string dialect: Dialect of SQL query ('standard' / 'legacy')
         :param col_order: Order of columns of resulting DataFrame
         :param list of tuples app_views: App views to be queried, in the format `(<view reference>, <view id>)`
-        :param string app_query: App query to pass to BigQuery
+        :param string app_query: SQL-Like Query to return app data values
         :param list of tuples web_views: Web views to be queried, in the format `(<view reference>, <view id>)`
-        param string web_query: Web query to pass to BigQuery
+        param string web_query: SQL-Like Query to return web data values
         :return:
         """
 
@@ -61,10 +60,10 @@ class GaBigQuery(object):
             raise TypeError('Either app or web queries and views must be defined')
 
         if app_defined:
-            app_data = self.load_device_type(app_query, app_views, start_date, end_date, 'device_type', dialect)
+            app_data = self.read_views(app_query, app_views, start_date, end_date, 'device_type', dialect)
             app_data['region'] = app_data['region'].str.replace('South Africa', 'ZA').str.replace('Nigeria', 'NG')
         if web_defined:
-            web_data = self.load_device_type(web_query, web_views, start_date, end_date, 'region', dialect)
+            web_data = self.read_views(web_query, web_views, start_date, end_date, 'region', dialect)
             web_data['device_type'] = 'web'
             web_data['appVersion'] = 'NA'
         if app_defined and web_defined:
