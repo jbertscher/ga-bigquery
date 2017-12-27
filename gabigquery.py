@@ -14,12 +14,14 @@ class GaBigQuery(object):
         """
         Loads data from one or more Google Analytics views in Google Big Query
 
-        :param string query: SQL-Like Query to return data values
-        :param list(tuple(<view reference>, <view id>)) views: Views to be queried, in the format
-        `(<view reference>, <view id>)`
+        :param string query: SQL-Like Query to return data values. The following placeholders should be present:
+          # {0}: will be replaced by 'view id' in each tuple passed in `views`
+          # {1}: will be replaced by `start_date`
+          # {2}: will be replaced by `end_date`
+        :param list(tuple(view reference, view id)) views: Views to be queried, in the format `(view reference, view id)`
         :param date start_date: Start date of query
         :param date end_date: End date of query
-        :param string view_diff: Header for the column that will contain `<view reference>` passed as part of `view`
+        :param string view_diff: Header for the column that will contain `view reference` passed as part of `view`
         :param string dialect: Dialect of SQL query ('standard' / 'legacy')
         :return: DataFrame
         """
@@ -38,7 +40,7 @@ class GaBigQuery(object):
 
 
     def read_app_and_web_views(self, start_date, end_date, dialect = 'legacy', col_order = None,
-                   app_views = None, app_query = None, web_views = None, web_query = None):
+                               app_views = None, app_query = None, web_views = None, web_query = None):
         """
         Like `read_views` but allows querying app and web views separately and combines results
 
@@ -46,10 +48,16 @@ class GaBigQuery(object):
         :param date end_date: End date of query
         :param string dialect: Dialect of SQL query ('standard' / 'legacy')
         :param col_order: Order of columns of resulting DataFrame
-        :param list of tuples app_views: App views to be queried, in the format `(<view reference>, <view id>)`
-        :param string app_query: SQL-Like Query to return app data values
-        :param list of tuples web_views: Web views to be queried, in the format `(<view reference>, <view id>)`
-        param string web_query: SQL-Like Query to return web data values
+        :param list of tuples app_views: App views to be queried, in the format `(view reference, view id)`
+        :param string app_query: SQL-Like Query to return app data values. The following placeholders should be present:
+          # {0}: will be replaced by 'view id' in each tuple passed in `views`
+          # {1}: will be replaced by `start_date`
+          # {2}: will be replaced by `end_date`
+        :param list of tuples web_views: Web views to be queried, in the format `(view reference, view id)`
+        param string web_query: SQL-Like Query to return web data values. The following placeholders should be present:
+          # {0}: will be replaced by 'view id' in each tuple passed in `views`
+          # {1}: will be replaced by `start_date`
+          # {2}: will be replaced by `end_date`
         :return:
         """
 
