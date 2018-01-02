@@ -19,12 +19,15 @@ class GaBigQuery(object):
           # {1}: will be replaced by `start_date`
           # {2}: will be replaced by `end_date`
         :param list(tuple(view reference, view id)) views: Views to be queried, in the format `(view reference, view id)`
-        :param date start_date: Start date of query
-        :param date end_date: End date of query
+        :param date start_date: Start date of query (yyyy-mm-dd)
+        :param date end_date: End date of query (yyyy-mm-dd)
         :param string view_diff: Header for the column that will contain `view reference` passed as part of `view`
         :param string dialect: Dialect of SQL query ('standard' / 'legacy')
         :return: DataFrame
         """
+        if dialect == 'standard':
+            start_date = start_date.strftime('%Y%m%d')
+            end_date = end_date.strftime('%Y%m%d')
         data = None
         for v in views:
             next_view = pd.read_gbq(query.format(v[1], start_date, end_date),
@@ -44,8 +47,8 @@ class GaBigQuery(object):
         """
         Like `read_views` but allows querying app and web views separately and combines results
 
-        :param date start_date: Start date of query
-        :param date end_date: End date of query
+        :param date start_date: Start date of query (yyyy-mm-dd)
+        :param date end_date: End date of query (yyyy-mm-dd)
         :param string dialect: Dialect of SQL query ('standard' / 'legacy')
         :param col_order: Order of columns of resulting DataFrame
         :param list of tuples app_views: App views to be queried, in the format `(view reference, view id)`
